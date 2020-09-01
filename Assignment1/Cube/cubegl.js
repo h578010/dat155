@@ -21,7 +21,7 @@ class CubeGL {
      */
     constructor(model) {
         this._model = model;
-        this._axis = X_AXIS;
+        this.axis = X_AXIS;
 
         let canvas = document.getElementById("gl-canvas");
 
@@ -33,22 +33,46 @@ class CubeGL {
         if (!gl) {
             alert("WebGL 2.0 isn't available");
         }
-        this.mv = mat4(
+        this.scale1 = mat4(
             1, 0, 0, 0,
-            0, 1, 0, -0.45,
+            0, 1, 0, 0,
             0, 0, 1, 0,
             0, 0, 0, 1);
-        
-        this.mv2 = mat4(
+
+        this.trans1 = mat4(
+            1, 0, 0, 0,
+            0, 1, 0, -0.5,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
+
+        this.scale2 = mat4(
             0.5, 0, 0, 0,
-            0, 0.5, 0, 0.30,
+            0, 0.5, 0, 0,
             0, 0, 0.5, 0,
             0, 0, 0, 1);
 
-        this.mv3 = mat4(
+        this.trans2 = mat4(
+            1, 0, 0, 0,
+            0, 1, 0, 0.5,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
+
+        this.scale3 = mat4(
             0.25, 0, 0, 0,
-            0, 0.25, 0, 0.67,
+            0, 0.25, 0, 0,
             0, 0, 0.25, 0,
+            0, 0, 0, 1);
+        
+        this.trans3 = mat4(
+            1, 0, 0, 0,
+            0, 1, 0, 2.5,
+            0, 0, 1, 0,
+            0, 0, 0, 1);
+
+        this.globalScale = mat4(
+            0.75, 0, 0, 0,
+            0, 0.75, 0, 0,
+            0, 0, 0.75, 0,
             0, 0, 0, 1);
 
         let indices = [
@@ -102,6 +126,10 @@ class CubeGL {
 
         this.mvLoc = this._gl.getUniformLocation(this.program, "modelView");
 
+        this.angleZ = 0;
+        this.angleY = 0; 
+        this.angleX = 0; 
+        this.angleSmallY = 0;
 
         view = this;
         render();
@@ -111,19 +139,46 @@ class CubeGL {
      * Update the cube.
      */
     update() {
+        if (this.axis == X_AXIS) {
+            this.angleX += 0.5;
+        } else if (this.axis == Y_AXIS) {
+            this.angleY += 0.5;
+        } else if (this.axis == Z_AXIS) {
+            this.angleZ += 0.5;
+        }
+
+        let rotX = rotateX(this.angleX);
+        let rotZ = rotateZ(this.angleZ);
+        let rotY = rotateY(this.angleY);  
+        
+        this.angleSmallY -= 3.0; 
+        let smallRotY = rotateY(this.angleSmallY);
+        let rotAll = mult(rotZ, mult(rotX, rotY));
+
+        let mv1 = mult(this.scale1, rotAll);
+        mv1 = mult(mv1, this.globalScale);
+        mv1 = mult(mv1, this.trans1);
+
+        let mv2 = mult(this.scale2, rotAll);
+        mv2 = mult(mv2, this.globalScale);
+        mv2 = mult(mv2, this.trans2);
+
+        let mv3 = mult(this.scale3, rotAll);
+        mv3 = mult(mv3, this.globalScale);
+        mv3 = mult(mv3, this.trans3);
+        mv3 = mult(mv3, smallRotY);        
+        
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         gl.useProgram(this.program);
         // this.theta[this._axis] += 2.0;
-        this._gl.uniformMatrix4fv(this.mvLoc, false, flatten(this.mv));
+        this._gl.uniformMatrix4fv(this.mvLoc, false, flatten(mv1));
         this._gl.drawArrays(this._gl.TRIANGLES, 0, this.numVertices);
 
-        this._gl.uniformMatrix4fv(this.mvLoc, false, flatten(this.mv2));
+        this._gl.uniformMatrix4fv(this.mvLoc, false, flatten(mv2));
         this._gl.drawArrays(this._gl.TRIANGLES, 0, this.numVertices);
 
-        this._gl.uniformMatrix4fv(this.mvLoc, false, flatten(this.mv3));
-        this._gl.drawArrays(this._gl.TRIANGLES, 0, this.numVertices);
-
-           
+        this._gl.uniformMatrix4fv(this.mvLoc, false, flatten(mv3));
+        this._gl.drawArrays(this._gl.TRIANGLES, 0, this.numVertices);  
     }
 
     set axis(axis) {
@@ -133,7 +188,6 @@ class CubeGL {
     get axis() {
         return this._axis;
     }
-
 }
 
 /**
