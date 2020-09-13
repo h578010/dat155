@@ -21,7 +21,7 @@ class CubeGL {
      */
     constructor(model) {
         this._model = model;
-        this.axis = X_AXIS;
+        this.axis = Y_AXIS;
 
         let canvas = document.getElementById("gl-canvas");
 
@@ -33,6 +33,7 @@ class CubeGL {
         if (!gl) {
             alert("WebGL 2.0 isn't available");
         }
+
         this.scale1 = mat4(
             1, 0, 0, 0,
             0, 1, 0, 0,
@@ -93,7 +94,6 @@ class CubeGL {
 
                 // for solid colored faces use i = 0
                 sideColors.push(this._model.colors[indices[j][i]]);
-
             }
         }
 
@@ -118,7 +118,6 @@ class CubeGL {
         let vBuffer = this._gl.createBuffer();
         this._gl.bindBuffer(this._gl.ARRAY_BUFFER, vBuffer);
         this._gl.bufferData(this._gl.ARRAY_BUFFER, flatten(points), this._gl.STATIC_DRAW);
-
 
         let vPosition = this._gl.getAttribLocation(this.program, "vPosition");
         this._gl.vertexAttribPointer(vPosition, 4, this._gl.FLOAT, false, 0, 0);
