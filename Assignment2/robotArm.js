@@ -39,8 +39,8 @@ var LOWER_ARM_HEIGHT = 5.0;
 var LOWER_ARM_WIDTH  = 0.5;
 var UPPER_ARM_HEIGHT = 5.0;
 var UPPER_ARM_WIDTH  = 0.5;
-let CLAW_WIDTH       = 0.5;
-let CLAW_HEIGHT      = 2.0;
+let CLAW_WIDTH       = 0.25;
+let CLAW_HEIGHT      = 1.5;
 
 
 // Shader transformation matrices
@@ -54,8 +54,9 @@ var LowerArm = 1;
 var UpperArm = 2;
 let LowerClaw = 3;
 let UpperClaw = 4;
+let Wrist = 5;
 
-var theta= [0, 0, 0, 0, 0];
+var theta= [40, -30, -50, 20, -30, 0];
 
 var angle = 0;
 
@@ -140,18 +141,35 @@ window.onload = function init() {
 
     document.getElementById("slider1").onchange = function(event) {
         theta[0] = event.target.value;
+        console.log("base: " + event.target.value);
     };
     document.getElementById("slider2").onchange = function(event) {
          theta[1] = event.target.value;
+         console.log("lower arm: " + event.target.value);
     };
     document.getElementById("slider3").onchange = function(event) {
          theta[2] =  event.target.value;
+         console.log("upper arm: " + event.target.value);
     };
     document.getElementById("slider4").onchange = function(event) {
-        theta[3] =  event.target.value;
+        let value = event.target.value;
+        if (value < -0.5 * theta[4]) {
+            value = -0.5 * theta[4];
+        }
+        theta[3] =  value;
+        console.log("lower claw: " + event.target.value);
     };
     document.getElementById("slider5").onchange = function(event) {
-        theta[4] =  event.target.value;
+        let value = event.target.value;
+        if (value > 2 * theta[3]) {
+            value = 2 * theta[3];
+        }
+        theta[4] =  -value;
+        console.log("upper claw: " + event.target.value);
+    };
+    document.getElementById("slider6").onchange = function(event) {
+        theta[5] =  event.target.value;
+        console.log("claw angle: " + event.target.value);
     };
 
     modelViewMatrixLoc = gl.getUniformLocation(program, "modelViewMatrix");
@@ -230,6 +248,7 @@ function clawFinger() {
 //-----------------------------------------------------------------------------
 
 
+
 //-----------------------------------------------------------------------------
 
 var render = function() {
@@ -242,19 +261,32 @@ var render = function() {
     modelViewMatrix = mult(modelViewMatrix, translate(0.0, BASE_HEIGHT, 0.0));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[LowerArm], vec3(0, 0, 1 )));
     lowerArm();
-    printm( translate(0.0, BASE_HEIGHT, 0.0));
-    printm(modelViewMatrix);
+    //printm( translate(0.0, BASE_HEIGHT, 0.0));
+    //printm(modelViewMatrix);
 
     modelViewMatrix  = mult(modelViewMatrix, translate(0.0, LOWER_ARM_HEIGHT, 0.0));
     modelViewMatrix  = mult(modelViewMatrix, rotate(theta[UpperArm], vec3(0, 0, 1)) );
     upperArm();
 
-    modelViewMatrix = mult(modelViewMatrix, translate(0.0, UPPER_ARM_HEIGHT, 0.0));
+    let wrist = mult(modelViewMatrix, rotate(theta[Wrist], vec3(0, 1, 0)));
+    if (document.getElementById("box").checked) {
+        theta[Wrist] += 1;
+    }
+    
+    modelViewMatrix = mult(wrist, translate(0.125, UPPER_ARM_HEIGHT, 0.0));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[LowerClaw], vec3(0, 0, 1)));
     clawFinger();
 
     modelViewMatrix = mult(modelViewMatrix, translate(0.0, CLAW_HEIGHT, 0.0));
     modelViewMatrix = mult(modelViewMatrix, rotate(theta[UpperClaw], vec3(0, 0, 1)));
+    clawFinger();
+
+    modelViewMatrix = mult(wrist, translate(-0.125, UPPER_ARM_HEIGHT, 0.0));
+    modelViewMatrix = mult(modelViewMatrix, rotate(-theta[LowerClaw], vec3(0, 0, 1)));
+    clawFinger();
+
+    modelViewMatrix = mult(modelViewMatrix, translate(0.0, CLAW_HEIGHT, 0.0));
+    modelViewMatrix = mult(modelViewMatrix, rotate(-theta[UpperClaw], vec3(0, 0, 1)));
     clawFinger();
 
 //printm(modelViewMatrix);
