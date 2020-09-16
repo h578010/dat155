@@ -58,21 +58,12 @@ class Cube {
 
   init() {
     let gl = this.gl;
-    vBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, vBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW);
-
-    let positionLoc = gl.getAttribLocation(this.program, "aPosition");
-    gl.vertexAttribPointer(positionLoc, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(positionLoc);
-
-    cBuffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, cBuffer);
-    gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
-
-    var colorLoc = gl.getAttribLocation(this.program, "aColor");
-    gl.vertexAttribPointer(colorLoc, 4, gl.FLOAT, false, 0, 0);
-    gl.enableVertexAttribArray(colorLoc);
+    gl.useProgram(this.program);
+    this.vBuffer = gl.createBuffer();
+    
+    this.positionLoc = gl.getAttribLocation(this.program, "aPosition");
+    this.cBuffer = gl.createBuffer();
+    this.colorLoc = gl.getAttribLocation(this.program, "aColor");
 
     this.modelViewMatrixLoc = gl.getUniformLocation(this.program, "modelViewMatrix");
     projectionMatrix = ortho(-10, 10, -10, 10, -10, 10);
@@ -80,7 +71,17 @@ class Cube {
   }
 
   draw(mvMatrix) {
+    let gl = this.gl;
     gl.useProgram(this.program);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.vBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(points), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(this.positionLoc, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(this.positionLoc);
+    gl.bindBuffer(gl.ARRAY_BUFFER, this.cBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, flatten(colors), gl.STATIC_DRAW);
+    gl.vertexAttribPointer(this.colorLoc, 4, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(this.colorLoc);
+
     gl.uniformMatrix4fv(this.modelViewMatrixLoc, false, flatten(mvMatrix));
     gl.drawArrays(gl.TRIANGLES, 0, NumVertices);
   }

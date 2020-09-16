@@ -1,9 +1,7 @@
-"use strict";
-
 let canvas;
 let gl;
-let program;
 let cube;
+let sphere;
 
 // Parameters controlling the size of the Robot's arm
 let BASE_HEIGHT      = 2.0;
@@ -29,7 +27,6 @@ let Wrist = 5;
 let theta= [40, -30, -50, 20, -30, 0];
 let angle = 0;
 let modelViewMatrixLoc;
-let vBuffer, cBuffer;
 
 
 window.onload = function init() {
@@ -44,10 +41,16 @@ window.onload = function init() {
     gl.enable( gl.DEPTH_TEST );
 
     //  Load shaders and initialize attribute buffers
-    program = initShaders(gl, "vertex-shader", "fragment-shader" );
-    gl.useProgram(program);
-    cube = new Cube(gl, program);
+    let cubeprogram = initShaders(gl, "vertex-shader", "fragment-shader" );
+    gl.useProgram(cubeprogram);
+    cube = new Cube(gl, cubeprogram);
     cube.init();
+
+    let sphereprogram = initShaders(gl, "vertex-shader2", "fragment-shader2" );
+    gl.useProgram(sphereprogram);
+    sphere = new Sphere(gl, sphereprogram);
+    sphere.init();
+    
     
     document.getElementById("slider1").onchange = function(event) {
         theta[0] = event.target.value;
@@ -115,12 +118,15 @@ function clawFinger() {
 
     let t = mult(modelViewMatrix, instanceMatrix);
     cube.draw(t);
+    let s2 = scale(2,2,2);
+    sphere.draw(mult(t, s2));
 }
 
 let render = function() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
     modelViewMatrix = rotate(theta[Base], vec3(0, 1, 0 ));
+   
     base();
 
     modelViewMatrix = mult(modelViewMatrix, translate(0.0, BASE_HEIGHT, 0.0));
