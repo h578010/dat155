@@ -52,19 +52,19 @@ window.onload = function init() {
     sphere.init();
     
     
-    document.getElementById("slider1").onchange = function(event) {
+    document.getElementById("slider1").oninput = function(event) {
         theta[0] = event.target.value;
         console.log("base: " + event.target.value);
     };
-    document.getElementById("slider2").onchange = function(event) {
+    document.getElementById("slider2").oninput = function(event) {
          theta[1] = event.target.value;
          console.log("lower arm: " + event.target.value);
     };
-    document.getElementById("slider3").onchange = function(event) {
+    document.getElementById("slider3").oninput = function(event) {
          theta[2] =  event.target.value;
          console.log("upper arm: " + event.target.value);
     };
-    document.getElementById("slider4").onchange = function(event) {
+    document.getElementById("slider4").oninput = function(event) {
         let value = event.target.value;
         if (value < -0.5 * theta[4]) {
             value = -0.5 * theta[4];
@@ -72,7 +72,7 @@ window.onload = function init() {
         theta[3] =  value;
         console.log("lower claw: " + event.target.value);
     };
-    document.getElementById("slider5").onchange = function(event) {
+    document.getElementById("slider5").oninput = function(event) {
         let value = event.target.value;
         if (value > 2 * theta[3]) {
             value = 2 * theta[3];
@@ -80,7 +80,7 @@ window.onload = function init() {
         theta[4] =  -value;
         console.log("upper claw: " + event.target.value);
     };
-    document.getElementById("slider6").onchange = function(event) {
+    document.getElementById("slider6").oninput = function(event) {
         theta[5] =  event.target.value;
         console.log("claw angle: " + event.target.value);
     };
@@ -91,7 +91,6 @@ window.onload = function init() {
 function base() {
     let s = scale(BASE_WIDTH, BASE_HEIGHT, BASE_WIDTH);
     let instanceMatrix = mult( translate( 0.0, 0.5 * BASE_HEIGHT, 0.0 ), s);
-
     let t = mult(modelViewMatrix, instanceMatrix);
     cube.draw(t);
 }
@@ -118,15 +117,15 @@ function clawFinger() {
 
     let t = mult(modelViewMatrix, instanceMatrix);
     cube.draw(t);
-    let s2 = scale(2,2,2);
-    sphere.draw(mult(t, s2));
 }
+
+var cuberot = 0;
 
 let render = function() {
     gl.clear( gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT );
 
     modelViewMatrix = rotate(theta[Base], vec3(0, 1, 0 ));
-   
+    modelViewMatrix = mult(modelViewMatrix, translate(0.0, -5.0, 0.0));
     base();
 
     modelViewMatrix = mult(modelViewMatrix, translate(0.0, BASE_HEIGHT, 0.0));
@@ -138,6 +137,9 @@ let render = function() {
     upperArm();
 
     let wrist = mult(modelViewMatrix, rotate(theta[Wrist], vec3(0, 1, 0)));
+    modelViewMatrix = mult(wrist, translate(0, UPPER_ARM_HEIGHT, 0.0));
+    modelViewMatrix = mult(modelViewMatrix, scale(0.33,0.33,0.33));
+    sphere.draw(modelViewMatrix);
     if (document.getElementById("box").checked) {
         theta[Wrist] += 1;
     }

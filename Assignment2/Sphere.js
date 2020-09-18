@@ -148,7 +148,7 @@ function goldMaterial() {
 
 function light0() {
     let data = {};
-    data.lightPosition = vec4(0.0, 0.0, 10.0, 0.0 );;
+    data.lightPosition = vec4(0.0, -12.0, 0.0, 0.0 );;
     data.lightAmbient = vec4(0.2, 0.2, 0.2, 1.0 );
     data.lightDiffuse = vec4( 1.0, 1.0, 1.0, 1.0 );
     data.lightSpecular = vec4(1.0, 1.0, 1.0, 1.0 );
@@ -161,33 +161,54 @@ class Sphere {
         this.gl = gl;
         this.program = program;
         var mySphere = createSphere();
-        var myMaterial = goldMaterial();
-        var myLight = light0();
+        this.material = goldMaterial();
+        this.light = light0();
         this.normals = mySphere.TriangleNormals;
         this.points = mySphere.TriangleVertices;
     }
 
-    init() {
+    init() { 
+    // Attributes: aPostition, aColor, aNormal, 
+    // Uniforms: theta, modelViewMatrix, projectionMatrix, lightPosition, shininess
+    // Uniforms: ambientProduct, diffuseProduct, specularProduct
         let gl = this.gl;
         gl.useProgram(this.program);
-        this.nBuffer = gl.createBuffer();
-        this.normalLoc = gl.getAttribLocation(this.program, "aNormal");
+
+        this.positionLoc = gl.getAttribLocation(this.program, "aPosition");
         this.vBuffer = gl.createBuffer();
-        this.positionLoc2 = gl.getAttribLocation(this.program, "aPosition");
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.vBuffer);
+        gl.bufferData(gl.ARRAY_BUFFER, flatten(this.points), gl.STATIC_DRAW);
+
+        this.normalLoc = gl.getAttribLocation(this.program, "aNormal");
+        this.nBuffer = gl.createBuffer();
+        gl.bindBuffer(gl.ARRAY_BUFFER, this.nBuffer);
+        gl.bufferData( gl.ARRAY_BUFFER, flatten(this.normals), gl.STATIC_DRAW );
+
+        this.ambientProductLoc = gl.getUniformLocation(this.program, "ambientProduct");
+        this.diffuseProductLoc = gl.getUniformLocation(this.program, "diffuseProduct");
+        this.specularProductLoc = gl.getUniformLocation(this.program, "specularProduct");
         this.modelViewMatrixLoc = gl.getUniformLocation(this.program, "modelViewMatrix");
+        this.lightPositionLoc = gl.getUniformLocation(this.program, "lightPosition");
+        projectionMatrix = ortho(-10, 10, -10, 10, -10, 10);
+        gl.uniformMatrix4fv(gl.getUniformLocation(this.program, "projectionMatrix"), false, flatten(projectionMatrix));
     }
 
     draw(mvMatrix) {
         let gl = this.gl;
         gl.useProgram(this.program);
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.nBuffer );
-        gl.bufferData( gl.ARRAY_BUFFER, flatten(this.normals), gl.STATIC_DRAW );
-        // gl.vertexAttribPointer(this.normalLoc, 3, gl.FLOAT, false, 0, 0);
-        // gl.enableVertexAttribArray(this.normalLoc);
-        gl.bindBuffer( gl.ARRAY_BUFFER, this.vBuffer );
-        gl.bufferData( gl.ARRAY_BUFFER, flatten(this.points), gl.STATIC_DRAW );
-        gl.vertexAttribPointer(this.positionLoc2, 4, gl.FLOAT, false, 0, 0);
+
         gl.enableVertexAttribArray(this.positionLoc2);
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.vBuffer );
+        gl.vertexAttribPointer(this.positionLoc2, 4, gl.FLOAT, false, 0, 0);
+
+        gl.enableVertexAttribArray(this.normalLoc);
+        gl.bindBuffer( gl.ARRAY_BUFFER, this.nBuffer );
+        gl.vertexAttribPointer(this.normalLoc, 3, gl.FLOAT, false, 0, 0);
+
+        gl.uniform4fv(this.ambientProductLoc, flatten(this.material.materialAmbient));
+        gl.uniform4fv(this.diffuseProductLoc, flatten(this.material.materialDiffuse));
+        gl.uniform4fv(this.specularProductLoc, flatten(this.material.materialSpecular));
+        gl.uniform4fv(this.lightPositionLoc, flatten(this.light.lightPosition));
 
         gl.uniformMatrix4fv(this.modelViewMatrixLoc, false, flatten(mvMatrix));
         gl.drawArrays(gl.TRIANGLES, 0, this.points.length);
