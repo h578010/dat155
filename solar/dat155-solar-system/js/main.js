@@ -40,6 +40,14 @@ const moonMaterial = new BasicMaterial({
     map: renderer.loadTexture('resources/moon.jpg')
 });
 
+const saturnMaterial = new BasicMaterial({
+    map: renderer.loadTexture('resources/saturn.jpg')
+});
+
+const ringMaterial = new BasicMaterial({
+    map: renderer.loadTexture('resources/saturn_rings.png')
+});
+
 
 // Get more textures here:
 // https://www.solarsystemscope.com/textures/
@@ -70,7 +78,10 @@ const venusPrimitive = Primitive.from(sunPrimitive, venusMaterial);
 const earthPrimitive = Primitive.from(sunPrimitive, earthMaterial);
 const marsPrimitive = Primitive.from(sunPrimitive, marsMaterial);
 const jupiterPrimitive = Primitive.from(sunPrimitive, jupiterMaterial);
+const saturnPrimitive = Primitive.from(sunPrimitive, saturnMaterial);
 const moonPrimitive = Primitive.from(sunPrimitive, moonMaterial);
+const ringPrimitive = Primitive.createRing(ringMaterial, 100, 0.75);
+const ring2Primitive = Primitive.from(ringPrimitive, moonMaterial);
 
 // Next we create a Node that represents the Earths orbit.
 // This node is not translated at all, because we want it to be centered inside the sun.
@@ -80,6 +91,7 @@ const venusOrbitNode = new Node(scene);
 const earthOrbitNode = new Node(scene);
 const marsOrbitNode = new Node(scene);
 const jupiterOrbitNode = new Node(scene);
+const saturnOrbitNode = new Node(scene);
 
 // This node represents the center of the earth.
 const mercuryCenterNode = new Node(mercuryOrbitNode);
@@ -87,8 +99,11 @@ const venusCenterNode = new Node(venusOrbitNode);
 const earthCenterNode = new Node(earthOrbitNode);
 const marsCenterNode = new Node(marsOrbitNode);
 const jupiterCenterNode = new Node(jupiterOrbitNode);
+const saturnCenterNode = new Node(saturnOrbitNode);
 const moonOrbitNode = new Node(earthCenterNode);
 const moonCenterNode = new Node(moonOrbitNode);
+const ringNode = new Node(saturnCenterNode);
+const ring2Node = new Node(saturnCenterNode);
 
 // We translate it along the x-axis to a suitable position.
 // When the earthOrbitNode is rotated, this node will orbit about the center of the sun.
@@ -96,7 +111,8 @@ mercuryCenterNode.setTranslation(2.75, 0, 0);
 venusCenterNode.setTranslation(8.45, 0, 0);
 earthCenterNode.setTranslation(11.45, 0, 0);
 marsCenterNode.setTranslation(15.00, 0, 0);
-jupiterCenterNode.setTranslation(50.00, 0, 0);
+jupiterCenterNode.setTranslation(30.00, 0, 0);
+saturnCenterNode.setTranslation(40.00, 0, 0);
 moonCenterNode.setTranslation(0, 0.2, 0);
 
 // Create a new Mesh for the Earth.
@@ -105,7 +121,10 @@ const venus = new Mesh([venusPrimitive]);
 const earth = new Mesh([earthPrimitive]);
 const mars = new Mesh([marsPrimitive]);
 const jupiter = new Mesh([jupiterPrimitive]);
+const saturn = new Mesh([saturnPrimitive]);
 const moon = new Mesh([moonPrimitive]);
+const rings = new Mesh([ringPrimitive]);
+const rings2 = new Mesh([ring2Primitive]);
 
 // We add it to the earthCenterNode, so that it orbits around the sun.
 mercuryCenterNode.add(mercury);
@@ -113,7 +132,10 @@ venusCenterNode.add(venus);
 earthCenterNode.add(earth);
 marsCenterNode.add(mars);
 jupiterCenterNode.add(jupiter);
+saturnCenterNode.add(saturn);
 moonCenterNode.add(moon);
+ringNode.add(rings);
+ring2Node.add(rings2);
 
 // True scale: earth.setScale(0.0091, 0.0091, 0.0091);
 mercury.setScale(0.035, 0.035, 0.035);
@@ -121,7 +143,12 @@ venus.setScale(0.091, 0.091, 0.091);
 earth.setScale(0.091, 0.091, 0.091); // 10 times larger than irl
 mars.setScale(0.045, 0.045, 0.045);
 jupiter.setScale(0.9, 0.9, 0.9);
+saturn.setScale(0.8, 0.8, 0.8);
 moon.setScale(0.045, 0.045, 0.045);
+rings.setScale(1.4, 1.4, 1.4);
+rings.rotateX(3.14/6);
+rings2.setScale(2, 2, 2);
+rings2.rotateX(3.14/6);
 
 // We create a Node representing movement, in order to decouple camera rotation.
 // We do this so that the skybox follows the movement, but not the rotation of the camera.
@@ -280,6 +307,7 @@ function loop(now) {
     earthOrbitNode.rotateY(orbitalRotationFactor);
     marsOrbitNode.rotateY(orbitalRotationFactor * 365/687);
     jupiterOrbitNode.rotateY(orbitalRotationFactor * 365/4330);
+    saturnOrbitNode.rotateY(orbitalRotationFactor * 365/8660);
     moonOrbitNode.rotateX(orbitalRotationFactor * 365/30);
 
     sun.rotateY(orbitalRotationFactor * 25); // The Sun rotates approx. 25 times per year.
@@ -288,6 +316,9 @@ function loop(now) {
     earth.rotateY(orbitalRotationFactor * 365); // The Earth rotates approx. 365 times per year.
     mars.rotateY(orbitalRotationFactor * 360)
     jupiter.rotateY(orbitalRotationFactor * 365/12);
+    saturn.rotateY(orbitalRotationFactor * 365/12);
+
+    
 
     // Reset mouse movement accumulator every frame.
     yaw = 0;
