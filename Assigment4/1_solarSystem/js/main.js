@@ -12,28 +12,28 @@ let time = 0.001;
 const scene = new Scene();
 
 // We load some textures and instantiate materials from them:
-const sunMaterial = new PhongMaterial({
-    map: renderer.loadTexture('resources/sun.jpg'),
-    ambient: vec4.fromValues(0.4, 0.4, 0.4, 1.0)
+const sunMaterial = new BasicMaterial({
+    map: renderer.loadTexture('resources/sun.jpg')
 });
 
-const earthMaterial = new BasicMaterial({
-    map: renderer.loadTexture('resources/earth_daymap.jpg')
+const earthMaterial = new PhongMaterial({
+    map: renderer.loadTexture('resources/earth_daymap.jpg'), 
+    shininess: 15.00
 });
 
-const marsMaterial = new BasicMaterial({
+const marsMaterial = new PhongMaterial({
     map: renderer.loadTexture('resources/mars.jpg')
 });
 
-const mercuryMaterial = new BasicMaterial({
+const mercuryMaterial = new PhongMaterial({
     map: renderer.loadTexture('resources/mercury.jpg')
 });
 
-const venusMaterial = new BasicMaterial({
+const venusMaterial = new PhongMaterial({
     map: renderer.loadTexture('resources/venus_atm.jpg')
 });
 
-const jupiterMaterial = new BasicMaterial({
+const jupiterMaterial = new PhongMaterial({
     map: renderer.loadTexture('resources/jupiter.jpg')
 });
 
@@ -41,7 +41,7 @@ const moonMaterial = new BasicMaterial({
     map: renderer.loadTexture('resources/moon.jpg')
 });
 
-const saturnMaterial = new BasicMaterial({
+const saturnMaterial = new PhongMaterial({
     map: renderer.loadTexture('resources/saturn.jpg')
 });
 
@@ -62,6 +62,9 @@ const ringMaterial = new BasicMaterial({
 // The generated geometry is called a UV-sphere and it has 32 vertical and horizontal subdivisions (latitude and longitude).
 // Additionally, we specify that we want the Primitive to be drawn with sunMaterial.
 const sunPrimitive = Primitive.createSphere(sunMaterial, 32, 32);
+const sunCenterNode = new Node(scene);
+const lightNode = new Light();
+sunCenterNode.add(lightNode);
 
 // A Primitive is only drawn as part of a Mesh,
 // so we instantiate a new Mesh with the sunPrimitive.
@@ -93,9 +96,8 @@ const earthOrbitNode = new Node(scene);
 const marsOrbitNode = new Node(scene);
 const jupiterOrbitNode = new Node(scene);
 const saturnOrbitNode = new Node(scene);
-const lightNode = new Light();
-scene.add(lightNode);
-lightNode.setTranslation(10, 4, 0);
+
+//lightNode.setTranslation(10, 4, 0);
 
 // This node represents the center of the earth.
 const mercuryCenterNode = new Node(mercuryOrbitNode);
