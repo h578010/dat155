@@ -20,10 +20,14 @@ export default class SolarSystem {
         scene.add(this.sun);
 
         this.earthOrbitNode = new Object3D();
+        this.marsOrbitNode = new Object3D();
         this.sun.add(this.earthOrbitNode);
+        this.sun.add(this.marsOrbitNode);
 
         let earthTextureUrl = "resources/texture_earth.jpg";
         let earthTexture = new TextureLoader().load(earthTextureUrl);
+        let marsTextureUrl = "resources/texture_mars.jpg";
+        let marsTexture = new TextureLoader().load(marsTextureUrl);
 
         let earthSpecularMap = new TextureLoader().load("resources/earthspec1k.jpg");
         let earthNormalMap = new TextureLoader().load("resources/2k_earth_normal_map.png");
@@ -34,13 +38,27 @@ export default class SolarSystem {
             normalMap: earthNormalMap
         });
 
+        let marsSpecularMap = new TextureLoader().load("resources/mars_spec.png");
+        let marsNormalMap = new TextureLoader().load("resources/mars_norm.jpg");
+
+        let marsMaterial = new MeshPhongMaterial({map:marsTexture,
+            shininess:1.0,
+            specular: marsSpecularMap,
+            normalMap: marsNormalMap
+        });
+
+      
         radius = 2.5;
         let earthGeometry = new SphereGeometry(radius, widthSegments, heightSegments);
+        let marsGeometry = new SphereGeometry(radius, widthSegments, heightSegments);
         this.earth = new Mesh(earthGeometry, earthMaterial);
+        this.mars = new Mesh(marsGeometry, marsMaterial);
                 
         this.earth.position.x = 15;
+        this.mars.position.x = 25;
 
         this.earthOrbitNode.add(this.earth);
+        this.marsOrbitNode.add(this.mars);
 
         this.sunLight = new PointLight(0xffffff, 3);
         this.sun.add(this.sunLight);
