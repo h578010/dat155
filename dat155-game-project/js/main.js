@@ -52,7 +52,7 @@ player.add(playerMesh);
 // Create a CollisionObject for the player.
 const playerCollisionObject = new CollisionObject(playerMesh, true);
 
-let health = 100;
+let health = 25;
 
 // Add an OnIntersectListener so that we can react to the player colliding into other CollisionObjects in the world.
 playerCollisionObject.setOnIntersectListener((delta, entity) => {
@@ -241,6 +241,9 @@ function loop(now) {
 
     vec3.set(velocity, 0.0, 0.0, 0.0);
 
+    if (health <= 0) {
+        moveSpeed = 0;
+    }
 
     if (move.left) {
         velocity[0] -= moveSpeed;
