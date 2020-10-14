@@ -40,12 +40,13 @@ const light = new Light({
 });
 
 player.add(light);
+//light.setTranslation(0, 1, 0);
 
 // Move the player back slightly (-z is forward) so that the first chunk is generated properly.
 player.applyTranslation(0, 0, 1);
 // Create a Mesh representing the player.
 const playerMesh = new Mesh([spherePrimitive]);
-const sphereRadius = 0.5;
+const sphereRadius = 0.4;
 playerMesh.applyScale(sphereRadius, sphereRadius, sphereRadius);
 
 // Translate mesh so that it touches the floor.
@@ -57,7 +58,7 @@ player.add(playerMesh);
 // Create a CollisionObject for the player.
 const playerCollisionObject = new CollisionObject(playerMesh, true);
 
-let health = 200;
+let health = 20;
 let score = 0;
 
 // Add an OnIntersectListener so that we can react to the player colliding into other CollisionObjects in the world.
@@ -140,7 +141,7 @@ let move = {
     backward: false,
     left: false,
     right: false,
-    speed: 0.0005,
+    speed: 0.002,
     mode: 0
 };
 
@@ -207,10 +208,10 @@ window.addEventListener('keyup', (e) => {
 player.add(moveNode);
 
 // Position the camera according to the player.
-moveNode.setTranslation(8, 2, 0);
+moveNode.setTranslation(0, 4, 8);
 
 // Tilt the camera down slightly.
-camera.setRotationFromEuler(cameraTilt, 90.0, 0.0);
+camera.setRotationFromEuler(cameraTilt, 0.0, 0.0);
 
 let skyBoxMaterial = new CubeMapMaterial({
     map: renderer.loadCubeMap([
@@ -247,6 +248,11 @@ function loop(now) {
 
     vec3.set(velocity, 0.0, 0.0, 0.0);
 
+    if (health > 0) {
+        score += delta/100;
+        document.getElementById("score").innerHTML = "Score: " + Math.floor(score);
+    }
+
     if (health <= 0) {
         moveSpeed = 0;
     }
@@ -263,7 +269,8 @@ function loop(now) {
 
         velocity[2] -= moveSpeed * 2;
         player.applyTranslation(...velocity); // using the spread operator ( equivalent to ..applyTranslation(velocity[0], velocity[1], velocity[2]); )
-        playerMesh.rotateX(velocity[2]/sphereRadius);  // velocity in z-direction * 2PIr
+        playerMesh.rotateX(velocity[2]/sphereRadius);  
+
 
     } else if (move.mode === 1) {
 
